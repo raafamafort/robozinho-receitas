@@ -1,0 +1,12 @@
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <span class="navbar-brand mb-0 h1" onclick="window.location='{% url 'home' %}';">Robozinho de receitas</span>
+
+    {% if user.is_authenticated %}
+    <div class="ml-auto">
+        <span class="navbar-text">
+            Seja bem vindo, {{ user.first_name|default:user.username }}!
+        </span>
+        <a href="{% url 'logout' %}" class="btn btn-outline-danger">Logoff</a>
+    </div>
+    {% endif %}
+</nav>

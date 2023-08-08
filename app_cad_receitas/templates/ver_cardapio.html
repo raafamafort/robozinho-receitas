@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+    <title>Ver Cardápio</title>
+
+    <style>
+        body {
+            background-color: #f7f7f7;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 20px auto;
+        }
+
+        .receita-card {
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 10px;
+            margin-bottom: 20px;
+        }
+
+        .receita-card h3 {
+            margin-top: 0;
+        }
+
+        .receita-card ul {
+            padding-left: 20px;
+        }
+
+        .btn-custom {
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    {% include "_header.html" %}
+    <div class="container">
+        <h1 class="text-center">VER CARDAPIO</h1>
+        <div class="row">
+            {% for receita in receitas %}
+            <div class="col-md-6">
+                <div class="receita-card">
+                    <h3>{{ receita.nome }} - R$ {{receita.preco_venda}}</h3>
+                    <p>Taxa extra: {{ receita.taxa_extra }} %</p>
+                    <p>Porções: {{ receita.porcoes }} unidades</p>
+                    <h4>Ingredientes e Custos:</h4>
+                    <ul>
+                        {% for ingrediente in receita.ingredientes.all %}
+                        <li>{{ ingrediente.nome }}</li>
+                        {% endfor %}
+                    </ul>
+                    <div class="d-flex justify-content-between">
+                        <button type="button" class="btn btn-custom" data-toggle="modal" data-target="#modal-analise-{{ receita.id_receita }}">Análise de Custo</button>
+                        <button type="button" class="btn btn-warning" data-toggle="modal" data-target="#editReceitaModal-{{ receita.id_receita }}">Editar Receita</button>
+                        <form method="post" action="{% url 'excluir_receita' receita.id_receita %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-danger">Excluir Receita</button>
+                        </form>                       
+                    </div>
+                </div>
+            </div>
+            <div class="modal fade" id="editReceitaModal-{{ receita.id_receita }}" tabindex="-1" role="dialog" aria-labelledby="editReceitaModalLabel" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                    <h5 class="modal-title" id="editReceitaModalLabel">Editar Receita</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    </div>
+                    <div class="modal-body">
+                        <form method="post" action="{% url 'editar_receita' receita.id_receita %}">
+                            {% csrf_token %}
+                            <div class="form-group">
+                                <label for="nomeReceita-{{ receita.id_receita }}">Nome da Receita</label>
+                                <input type="text" class="form-control" id="nomeReceita-{{ receita.id_receita }}" name="nome_receita" value="{{ receita.nome }}">
+                            </div>
+                            <div class="form-group">
+                                <label for="taxaExtra-{{ receita.id_receita }}">Taxa Extra (%)</label>
+                                <input type="number" step="0.01" min="0" class="form-control" id="taxaExtra-{{ receita.id_receita }}" name="taxa_extra" value="{{ receita.taxa_extra }}">
+                            </div>
+                            <div class="form-group">
+                                <label for="porcoes-{{ receita.id_receita }}">Porções</label>
+                                <input type="number" class="form-control" id="porcoes-{{ receita.id_receita }}" name="porcoes" value="{{ receita.porcoes }}">
+                            </div>
+                            <ul>
+                            </ul>
+                            <button id="submit-receita" type="submit" class="btn btn-primary">Salvar Alterações</button>
+                        </form>
+                        <h4 style="margin-top: 10px; border-top: 1px solid #dee2e6;">Ingredientes</h4>
+                        {% for ingrediente in receita.ingredientes.all %}
+                            <li>
+                                {{ ingrediente.nome }} - 
+                                <button type="button" class="btn btn-small btn-warning" data-toggle="modal" data-target="#editIngredienteModal-{{ ingrediente.id_ingrediente }}">Editar</button>
+                            </li>
+                            
+                            <div class="modal fade" id="editIngredienteModal-{{ ingrediente.id_ingrediente }}" tabindex="-1" role="dialog" aria-labelledby="editIngredienteModalLabel-{{ ingrediente.id_ingrediente }}" aria-hidden="true">
+                                <div class="modal-dialog" role="document">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="editIngredienteModalLabel-{{ ingrediente.id_ingrediente }}">Editar Ingrediente</h5>
+                                            <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
+                                                <span aria-hidden="true">&times;</span>
+                                            </button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <form method="post" action="{% url 'editar_ingrediente' ingrediente.id_ingrediente %}">
+                                                {% csrf_token %}
+                                                <div class="form-group">
+                                                    <label for="nomeIngrediente-{{ ingrediente.id_ingrediente }}">Nome do Ingrediente</label>
+                                                    <input type="text" class="form-control" id="nomeIngrediente-{{ ingrediente.id_ingrediente }}" name="nome_ingrediente" value="{{ ingrediente.nome }}">
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="tipoMedida-{{ ingrediente.id_ingrediente }}">Tipo de Medida</label>
+                                                    <select class="form-control" id="tipoMedida-{{ ingrediente.id_ingrediente }}" name="tipo_medida">
+                                                        <option value="unidade" {% if ingrediente.tipo_medida == "unidade" %}selected{% endif %}>Unidade</option>
+                                                        <option value="gramas" {% if ingrediente.tipo_medida == "gramas" %}selected{% endif %}>Gramas</option>
+                                                        <option value="mililitros" {% if ingrediente.tipo_medida == "mililitros" %}selected{% endif %}>Mililitros</option>
+                                                    </select>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="valorGasto-{{ ingrediente.id_ingrediente }}">Valor Gasto</label>
+                                                    <input type="number" step="0.01" min="0" class="form-control" id="valorGasto-{{ ingrediente.id_ingrediente }}" name="valor_gasto" value="{{ ingrediente.valor_gasto }}">
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="qntComprada-{{ ingrediente.id_ingrediente }}">Quantidade Comprada</label>
+                                                    <input type="number" step="0.01" min="0" class="form-control" id="qntComprada-{{ ingrediente.id_ingrediente }}" name="qnt_comprada" value="{{ ingrediente.qnt_comprada }}">
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="qntUtilizada-{{ ingrediente.id_ingrediente }}">Quantidade Utilizada</label>
+                                                    <input type="number" step="0.01" min="0" class="form-control" id="qntUtilizada-{{ ingrediente.id_ingrediente }}" name="qnt_utilizada" value="{{ ingrediente.qnt_utilizada }}">
+                                                </div>
+                                                <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+                                            </form>  
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button id="submit-ingrediente" type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                    <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
+                    </div>
+                </div>
+                </div>
+            </div>
+            <div class="modal fade" id="modal-analise-{{ receita.id_receita }}" tabindex="-1" role="dialog" aria-labelledby="modal-analise-label-{{ receita.id_receita }}" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="modal-analise-label-{{ receita.id_receita }}">Análise de Custo para {{ receita.nome }}</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <h4>Receita e Custos:</h4>
+
+                            <ul>
+                                <li>Custo total da receita: R$ {{ receita.custo_total }}</li>
+                                <li>Custo total da receita com {{ receita.taxa_extra }}% adicional: R$ {{ receita.custo_total_com_extra }}</li>
+                                <li>Quantidade de porções: {{ receita.porcoes }}</li>
+                                <li>Custo por porção: R$ {{ receita.custo_por_porcao }}</li>
+                                <li>Custo por porção com {{ receita.taxa_extra }}% adicional: R$ {{ receita.custo_por_porcao_com_extra }}</li>
+                            </ul>
+                            <h4>Ingredientes e Custos:</h4>
+                            <ul>
+                                {% for ingrediente in receita.ingredientes.all %}
+                                <li>{{ ingrediente.nome }} - R$ {{ ingrediente.custo }} - {{ ingrediente.qnt_utilizada }} {{ ingrediente.tipo_medida }}</li>
+                                {% endfor %}
+                            </ul>
+                            <h4>Lucro:</h4>
+                            <form method="post" action="{% url 'calcular_lucro' %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="receita_id" value="{{ receita.id_receita }}">
+                                <div class="form-group">
+                                    <label for="preco_venda">Preço de Venda de cada porção:</label>
+                                    <input type="number" step="0.01" min="0" class="form-control" name="preco_venda" id="preco_venda" value="{{ receita.preco_venda }}">
+                                </div>
+                                <button type="submit" class="btn btn-primary">Calcular Lucro</button>
+                            </form>
+                            <p class="lucro {% if receita.calcular_lucro >= 0 %}lucro-positivo{% else %}lucro-negativo{% endif %}">
+                                Lucro da receita: R$ {{ receita.calcular_lucro }}
+                            </p>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.14.7/dist/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+</body>
+</html>

@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+    <style>
+        body {
+            background-color: #f7f7f7;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+            margin-top: 50px;
+        }
+
+        .navbar-brand {
+            cursor: pointer;
+        }
+
+        .ingredientes-container {
+            margin-top: 10px;
+        }
+
+        .ingredientes-item {
+            margin-top: 10px;
+            position: relative;
+            padding-right: 50px;
+        }
+
+        .remove-ingrediente-btn {
+            position: absolute;
+            right: 0;
+            top: 0;
+            margin-top: 5px;
+        }
+
+        hr {
+            border: 1px solid #ccc;
+        }
+
+        button[type="button"] {
+            margin-top: 10px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button[type="button-danger"] {
+            margin-top: 10px;
+            background-color: red;
+            color: #fff;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button[type="submit"] {
+            margin-top: 20px;
+            background-color: #28a745;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    </style>
+
+    <title>Criar Receitas</title>
+</head>
+<body>
+{% include "_header.html" %}
+<form action="{% url 'cadastrar_receita' %}" method="post">
+    {% csrf_token %}
+    <div class="container">
+        <h1 class="text-center">CRIAR RECEITAS</h1>
+        Nome da Receita: <input class="form-control" type="text" name="nome_receita">
+        Taxa Extra em %: <input class="form-control" type="text" name="taxa_extra">
+        Porções: <input class="form-control" type="number" name="porcoes">
+        Preço de Venda de cada porção: <input class="form-control" type="number" step="0.01" min="0" name="preco_venda">
+        <div id="ingredientes" class="ingredientes-container">
+            <h3>Ingredientes</h3>
+            <div class="ingredientes-item">
+                Ingrediente: <input class="form-control" type="text" name="nome_ingrediente[]">
+                Tipo Medida:
+                <select class="form-control" name="tipo_medida[]" onchange="mostrarMedida(this)">
+                    <option value="unidade">Unidade</option>
+                    <option value="gramas">Gramas</option>
+                    <option value="mililitros">Mililitros</option>
+                </select>
+                Valor gasto no ingrediente (R$): <input class="form-control" type="number" name="valor_gasto[]">
+                Quantidade de ingrediente em (<span class="medidaExibida">Unidade</span>) comprados: <input class="form-control" type="number" name="qnt_comprada[]">
+                Quantidade de ingrediente em (<span class="medidaExibida">Unidade</span>) utilizado na receita: <input class="form-control" type="number" name="qnt_utilizada[]">
+                <button type="button-danger" onclick="removerIngrediente(this)" class="remove-ingrediente-btn btn btn-danger">X</button>
+            </div>
+        </div>
+        <button type="button" onclick="adicionarIngrediente()" class="btn btn-primary">Adicionar Ingrediente</button>
+        <br>
+        <button type="submit" name="cadastrar_receita" class="btn btn-success">Cadastrar Receita</button>
+    </div>
+</form>
+
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.14.7/dist/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+
+<script>
+    function adicionarIngrediente() {
+        var divIngredientes = document.getElementById('ingredientes');
+        var novoIngrediente = document.createElement('div');
+        novoIngrediente.classList.add("ingredientes-item");
+        novoIngrediente.innerHTML = `
+            <hr>
+            Ingrediente: <input class="form-control" type="text" name="nome_ingrediente[]">
+            Tipo Medida:
+              <select class="form-control" name="tipo_medida[]" onchange="mostrarMedida(this)">
+                <option value="unidade">Unidade</option>
+                <option value="gramas">Gramas</option>
+                <option value="mililitros">Mililitros</option>
+              </select>
+            Valor gasto no ingrediente (R$): <input class="form-control" type="number" name="valor_gasto[]">
+            Quantidade de ingrediente em (<span class="medidaExibida">Unidade</span>) comprados: <input class="form-control" type="number" name="qnt_comprada[]">
+            Quantidade de ingrediente em (<span class="medidaExibida">Unidade</span>) utilizado na receita: <input class="form-control" type="number" name="qnt_utilizada[]">
+            <button type="button-danger" onclick="removerIngrediente(this)" class="remove-ingrediente-btn btn btn-danger">X</button>
+        `;
+        divIngredientes.appendChild(novoIngrediente);
+    }
+
+    function removerIngrediente(element) {
+        var divIngredientes = document.getElementById('ingredientes');
+        divIngredientes.removeChild(element.parentNode);
+    }
+
+    function mostrarMedida(select) {
+        var medidaExibida = select.closest('.ingredientes-item').querySelector('.medidaExibida');
+        var selectedOption = select.options[select.selectedIndex].text;
+        medidaExibida.textContent = selectedOption;
+    }
+</script>
+</body>
+</html>

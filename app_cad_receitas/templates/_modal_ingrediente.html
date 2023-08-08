@@ -1,0 +1,50 @@
+<li>
+    {{ ingrediente.nome }} - 
+    <button type="button" class="btn btn-small btn-warning" data-toggle="modal" data-target="#editIngredienteModal-{{ ingrediente.id_ingrediente }}">Editar</button>
+</li>
+
+<div class="modal fade" id="editIngredienteModal-{{ ingrediente.id_ingrediente }}" tabindex="-1" role="dialog" aria-labelledby="editIngredienteModalLabel-{{ ingrediente.id_ingrediente }}" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editIngredienteModalLabel-{{ ingrediente.id_ingrediente }}">Editar Ingrediente</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form method="post" action="{% url 'editar_ingrediente' ingrediente.id_ingrediente %}">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="nomeIngrediente-{{ ingrediente.id_ingrediente }}">Nome do Ingrediente</label>
+                        <input type="text" class="form-control" id="nomeIngrediente-{{ ingrediente.id_ingrediente }}" name="nome_ingrediente" value="{{ ingrediente.nome }}">
+                    </div>
+                    <div class="form-group">
+                        <label for="tipoMedida-{{ ingrediente.id_ingrediente }}">Tipo de Medida</label>
+                        <select class="form-control" id="tipoMedida-{{ ingrediente.id_ingrediente }}" name="tipo_medida">
+                            <option value="unidade" {% if ingrediente.tipo_medida == "unidade" %}selected{% endif %}>Unidade</option>
+                            <option value="gramas" {% if ingrediente.tipo_medida == "gramas" %}selected{% endif %}>Gramas</option>
+                            <option value="mililitros" {% if ingrediente.tipo_medida == "mililitros" %}selected{% endif %}>Mililitros</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="valorGasto-{{ ingrediente.id_ingrediente }}">Valor Gasto</label>
+                        <input type="number" step="0.01" min="0" class="form-control" id="valorGasto-{{ ingrediente.id_ingrediente }}" name="valor_gasto" value="{{ ingrediente.valor_gasto }}">
+                    </div>
+                    <div class="form-group">
+                        <label for="qntComprada-{{ ingrediente.id_ingrediente }}">Quantidade Comprada</label>
+                        <input type="number" step="0.01" min="0" class="form-control" id="qntComprada-{{ ingrediente.id_ingrediente }}" name="qnt_comprada" value="{{ ingrediente.qnt_comprada }}">
+                    </div>
+                    <div class="form-group">
+                        <label for="qntUtilizada-{{ ingrediente.id_ingrediente }}">Quantidade Utilizada</label>
+                        <input type="number" step="0.01" min="0" class="form-control" id="qntUtilizada-{{ ingrediente.id_ingrediente }}" name="qnt_utilizada" value="{{ ingrediente.qnt_utilizada }}">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+                </form>  
+            </div>
+            <div class="modal-footer">
+                <button id="submit-ingrediente" type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
+            </div>
+        </div>
+    </div>
+</div>
